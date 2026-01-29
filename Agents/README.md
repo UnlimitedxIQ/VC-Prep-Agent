@@ -4,7 +4,7 @@ A multi-agent system for generating complete venture capital industry theses on-
 
 ## System Overview
 
-This system uses 8 specialized agents to research, compile, and present VC industry theses:
+This system uses 11 specialized agents to research, compile, and present VC industry theses and networking strategies:
 
 ### Research Agents (Slide 1-5)
 1. **Slide1_Agent** - Emerging Trends of Interest
@@ -32,6 +32,20 @@ This system uses 8 specialized agents to research, compile, and present VC indus
    - Justifications and descriptors
    - Investment targets
 
+### Networking Strategy Agents
+9. **NetworkingResearch_Agent** - Networking Research
+   - Target profiles (founders, accelerators, angels)
+   - Outreach methods (events, LinkedIn, warm introductions)
+   - Ethical norms and reputational best practices
+
+10. **Outline_NETWORKING_AGENT** - Networking Strategy Compiler
+    - Aggregates networking research
+    - Produces 3-slide outline with 3 bullets each
+
+11. **POWERPOINT_NETWORKING_AGENT** - Networking Strategy Deck Generator
+    - Converts networking outline to PowerPoint
+    - Uses same formatting as VC thesis deck
+
 ### Orchestration Agents
 6. **Outline_AGENT_VC** - Thesis Compiler
    - Aggregates research from Slides 1-5
@@ -49,7 +63,7 @@ This system uses 8 specialized agents to research, compile, and present VC indus
    - Generates review report
 
 ### User Interface
-9. **TelegramVCBot** - Telegram Orchestrator
+12. **TelegramVCBot** - Telegram Orchestrator
    - Telegram bot interface
    - Orchestrates all agents
    - Delivers results to users
@@ -100,6 +114,11 @@ cd ../POWERPOINT_VC_AGENT && python agent.py "B2B Fintech"
 
 # Review
 cd ../FinalPass_agent && python agent.py "B2B Fintech"
+
+# Networking strategy
+cd ../NetworkingResearch_Agent && python agent.py "B2B Fintech" "US"
+cd ../Outline_NETWORKING_AGENT && python agent.py "B2B Fintech" "US"
+cd ../POWERPOINT_NETWORKING_AGENT && python agent.py "B2B Fintech"
 ```
 
 ### 4. Run Telegram Bot
@@ -114,6 +133,11 @@ python bot.py
 Then in Telegram:
 ```
 /vc B2B Fintech US
+```
+
+For networking strategy:
+```
+/networking B2B Fintech US
 ```
 
 ## Architecture
@@ -141,6 +165,23 @@ Then in Telegram:
                           └─► FinalPass_agent
 ```
 
+Networking strategy flow:
+```
+┌─────────────────────────────────────────────────────────┐
+│                    TelegramVCBot                        │
+│                  (User Interface)                       │
+└────────────────────┬────────────────────────────────────┘
+                     │
+                     ├──► Phase 1: Research
+                     │    └─► NetworkingResearch_Agent
+                     │
+                     ├──► Phase 2: Compilation
+                     │    └─► Outline_NETWORKING_AGENT
+                     │
+                     └──► Phase 3: Presentation
+                          └─► POWERPOINT_NETWORKING_AGENT
+```
+
 ## Output Files
 
 All outputs saved to `../Outputs/`:
@@ -154,6 +195,9 @@ All outputs saved to `../Outputs/`:
 - `vc_thesis_<sector>_<timestamp>.pptx` - PowerPoint deck
 - `vc_thesis_<sector>_<timestamp>_reviewed.pptx` - Reviewed deck
 - `review_analysis_<sector>_<timestamp>.md` - Quality analysis
+- `networking_research_<sector>_<timestamp>.md` - Networking research
+- `networking_strategy_<sector>_<timestamp>.md` - Networking strategy outline
+- `networking_strategy_<sector>_<timestamp>.pptx` - Networking strategy deck
 
 ## Development
 

@@ -37,6 +37,9 @@ from Slide5_Agent.agent import Slide5Agent
 from Outline_AGENT_VC.agent import OutlineAgent
 from POWERPOINT_VC_AGENT.agent import PowerPointAgent
 from FinalPass_agent.agent import FinalPassAgent
+from NetworkingResearch_Agent.agent import NetworkingResearchAgent
+from Outline_NETWORKING_AGENT.agent import OutlineNetworkingAgent
+from POWERPOINT_NETWORKING_AGENT.agent import PowerPointNetworkingAgent
 
 
 # Configure logging - hide sensitive tokens
@@ -92,6 +95,9 @@ class VCThesisBot:
         self._outline_agent = None
         self._powerpoint_agent = None
         self._finalpass_agent = None
+        self._networking_research_agent = None
+        self._networking_outline_agent = None
+        self._networking_powerpoint_agent = None
 
     def _get_agents(self):
         """Lazy initialization of agents."""
@@ -104,6 +110,9 @@ class VCThesisBot:
             self._outline_agent = OutlineAgent()
             self._powerpoint_agent = PowerPointAgent()
             self._finalpass_agent = FinalPassAgent()
+            self._networking_research_agent = NetworkingResearchAgent()
+            self._networking_outline_agent = OutlineNetworkingAgent()
+            self._networking_powerpoint_agent = PowerPointNetworkingAgent()
 
         return {
             'slide1': self._slide1_agent,
@@ -113,7 +122,10 @@ class VCThesisBot:
             'slide5': self._slide5_agent,
             'outline': self._outline_agent,
             'powerpoint': self._powerpoint_agent,
-            'finalpass': self._finalpass_agent
+            'finalpass': self._finalpass_agent,
+            'networking_research': self._networking_research_agent,
+            'networking_outline': self._networking_outline_agent,
+            'networking_powerpoint': self._networking_powerpoint_agent
         }
 
     async def start(self, update: Update, context: ContextTypes.DEFAULT_TYPE):
@@ -125,11 +137,14 @@ I can generate complete venture capital industry theses for any sector.
 
 Commands:
 - /vc <sector> [region] - Generate a complete VC thesis
+- /networking <sector> [region] - Generate a networking strategy deck
 - /status - Check bot status
 - /help - Show this help message
 
 Example:
 /vc B2B Fintech US
+
+/networking B2B Fintech US
 
 This will:
 1. Research emerging trends
@@ -163,6 +178,9 @@ Available Agents:
 - Outline_AGENT_VC - Thesis Compiler [OK]
 - POWERPOINT_VC_AGENT - Deck Generator [OK]
 - FinalPass_agent - Quality Review [OK]
+- NetworkingResearch_Agent - Networking Research [OK]
+- Outline_NETWORKING_AGENT - Networking Strategy Compiler [OK]
+- POWERPOINT_NETWORKING_AGENT - Networking Deck Generator [OK]
 
 All systems operational.
 """
@@ -201,6 +219,35 @@ All systems operational.
             logger.error(f"Error generating thesis: {e}", exc_info=True)
             await update.message.reply_text(
                 f"[ERROR] Error generating thesis: {str(e)}\n\nPlease try again."
+            )
+
+    async def networking_command(self, update: Update, context: ContextTypes.DEFAULT_TYPE):
+        """Handle /networking command to generate networking strategy deck."""
+        if not context.args:
+            await update.message.reply_text(
+                "Please provide a sector.\n\nUsage: /networking <sector> [region]\nExample: /networking B2B Fintech US"
+            )
+            return
+
+        sector = " ".join(context.args[:-1]) if len(context.args) > 1 else context.args[0]
+        region = context.args[-1] if len(context.args) > 1 and len(context.args[-1]) == 2 else "US"
+
+        if len(context.args) > 1 and len(context.args[-1]) > 2:
+            sector = " ".join(context.args)
+            region = "US"
+
+        await update.message.reply_text(
+            f"[STARTING] Networking strategy generation for: {sector} ({region})\n\n"
+            f"This will take approximately 2-4 minutes. I'll send you updates as I progress."
+        )
+
+        try:
+            agents = self._get_agents()
+            await self.run_networking_pipeline(update, sector, region, agents)
+        except Exception as e:
+            logger.error(f"Error generating networking strategy: {e}", exc_info=True)
+            await update.message.reply_text(
+                f"[ERROR] Error generating networking strategy: {str(e)}\n\nPlease try again."
             )
 
     async def run_research_pipeline(self, update: Update, sector: str, region: str, agents: dict):
@@ -288,6 +335,52 @@ All systems operational.
             f"Generate another: /vc <sector>"
         )
 
+    async def run_networking_pipeline(self, update: Update, sector: str, region: str, agents: dict):
+        """Run the networking strategy pipeline."""
+        await update.message.reply_text("[Phase 1/3] Running networking research...")
+
+        try:
+            await update.message.reply_text("  -> Researching target profiles, outreach, ethics...")
+            agents['networking_research'].run(sector, region)
+            await update.message.reply_text("[OK] Phase 1 complete: Networking research gathered")
+        except Exception as e:
+            logger.error(f"Error in networking research phase: {e}", exc_info=True)
+            raise
+
+        await update.message.reply_text("[Phase 2/3] Compiling networking strategy outline...")
+
+        try:
+            agents['networking_outline'].run(sector, region)
+            await update.message.reply_text("[OK] Phase 2 complete: Strategy outline compiled")
+        except Exception as e:
+            logger.error(f"Error compiling networking strategy: {e}", exc_info=True)
+            raise
+
+        await update.message.reply_text("[Phase 3/3] Creating networking strategy deck...")
+
+        try:
+            pptx_path = agents['networking_powerpoint'].run(sector)
+            await update.message.reply_text("[OK] Phase 3 complete: PowerPoint created")
+        except Exception as e:
+            logger.error(f"Error creating networking PowerPoint: {e}", exc_info=True)
+            await update.message.reply_text(
+                "[ERROR] PowerPoint generation failed. Please try again."
+            )
+            return
+
+        with open(pptx_path, 'rb') as f:
+            await update.message.reply_document(
+                document=f,
+                filename=f"Networking_Strategy_{sector.replace(' ', '_')}.pptx",
+                caption=f"Networking Strategy: {sector} ({region})"
+            )
+
+        await update.message.reply_text(
+            f"[COMPLETE] Networking Strategy for {sector} ({region})\n\n"
+            f"3 content slides | 3 bullets each\n\n"
+            f"Generate another: /networking <sector>"
+        )
+
     async def error_handler(self, update: Update, context: ContextTypes.DEFAULT_TYPE):
         """Handle errors."""
         logger.error(f"Update {update} caused error {context.error}")
@@ -309,6 +402,7 @@ All systems operational.
         application.add_handler(CommandHandler("help", self.help_command))
         application.add_handler(CommandHandler("status", self.status_command))
         application.add_handler(CommandHandler("vc", self.vc_command))
+        application.add_handler(CommandHandler("networking", self.networking_command))
 
         # Add error handler
         application.add_error_handler(self.error_handler)
