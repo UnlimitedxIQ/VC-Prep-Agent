@@ -1,0 +1,7 @@
+python-telegram-bot>=20.0
+langchain>=0.1.0
+langchain-openai>=0.0.5
+openai>=1.0.0
+python-pptx>=0.6.21
+python-dotenv>=1.0.0
+asyncio

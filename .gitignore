@@ -1,0 +1,28 @@
+# Secrets and local config
+Secrets/
+.env
+*.env
+
+# Generated outputs
+Outputs/
+*.pptx
+*.pdf
+*.docx
+
+# Python caches/bytecode
+__pycache__/
+*.py[cod]
+*.pyd
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+
+# Virtual environments
+.venv/
+venv/
+env/
+
+# OS/editor noise
+.DS_Store
+Thumbs.db
+.vscode/

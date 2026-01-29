@@ -1,0 +1,30 @@
+# GPTOSS VC Thesis Agents - Master Requirements
+# Install all dependencies for the complete system
+
+# Core LLM and LangChain
+langchain>=0.1.0
+langchain-openai>=0.0.5
+openai>=1.0.0
+
+# Web search (DuckDuckGo - no API key needed!)
+ddgs>=6.0.0
+
+# PowerPoint generation
+python-pptx>=0.6.21
+
+# Telegram bot
+python-telegram-bot>=20.0
+
+# Utilities
+python-dotenv>=1.0.0
+
+# Standard library (included with Python)
+# - asyncio
+# - pathlib
+# - datetime
+# - typing
+# - logging
+# - re
+# - json
+# - sys
+# - os
