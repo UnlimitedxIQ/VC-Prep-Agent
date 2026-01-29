@@ -312,7 +312,8 @@ All systems operational.
 
             # Send ONLY the final reviewed PowerPoint
             with open(reviewed_path, 'rb') as f:
-                await update.message.reply_document(
+                await context.bot.send_document(
+                    chat_id=update.effective_chat.id,
                     document=f,
                     filename=f"VC_Thesis_{sector.replace(' ', '_')}.pptx",
                     caption=f"VC Industry Thesis: {sector} ({region})"
@@ -322,7 +323,8 @@ All systems operational.
             logger.error(f"Error in review phase: {e}", exc_info=True)
             # Send the original deck if QA fails
             with open(pptx_path, 'rb') as f:
-                await update.message.reply_document(
+                await context.bot.send_document(
+                    chat_id=update.effective_chat.id,
                     document=f,
                     filename=f"VC_Thesis_{sector.replace(' ', '_')}.pptx",
                     caption=f"VC Industry Thesis: {sector} ({region})"
@@ -369,7 +371,8 @@ All systems operational.
             return
 
         with open(pptx_path, 'rb') as f:
-            await update.message.reply_document(
+            await context.bot.send_document(
+                chat_id=update.effective_chat.id,
                 document=f,
                 filename=f"Networking_Strategy_{sector.replace(' ', '_')}.pptx",
                 caption=f"Networking Strategy: {sector} ({region})"
